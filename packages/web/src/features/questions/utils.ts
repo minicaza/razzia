@@ -1,14 +1,20 @@
-import { MIN_ANSWERS } from "@razzia/common/constants"
+import { MIN_ANSWERS, QUESTION_TYPES } from "@razzia/common/constants"
 import { estimationAccuracy } from "@razzia/common/questions/estimation"
 import { isEstimationOptions } from "@razzia/common/questions/options"
+import { isCorrectPuzzleOrder } from "@razzia/common/questions/puzzle"
 import type { Question } from "@razzia/common/types/game"
 
 export const choiceInitialValues = (question: Question): Partial<Question> => {
-  if (question.answers.length >= MIN_ANSWERS) {
-    return {}
+  if (question.answers.length < MIN_ANSWERS) {
+    return { answers: ["", ""], solutions: [0] }
   }
 
-  return { answers: ["", ""], solutions: [0] }
+  // Coming from a puzzle, which keeps no solutions
+  if (!question.solutions?.length) {
+    return { solutions: [0] }
+  }
+
+  return {}
 }
 
 export const isAnswerCorrect = (
@@ -16,6 +22,13 @@ export const isAnswerCorrect = (
   answerIds: number[] | null,
 ): boolean => {
   const { solutions, options } = question
+
+  if (question.type === QUESTION_TYPES.PUZZLE) {
+    return (
+      answerIds !== null &&
+      isCorrectPuzzleOrder(answerIds, question.answers.length)
+    )
+  }
 
   if (!answerIds || !solutions) {
     return false

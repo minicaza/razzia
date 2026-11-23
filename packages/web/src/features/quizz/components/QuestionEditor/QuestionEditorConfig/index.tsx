@@ -11,10 +11,15 @@ import {
   QUESTION_REGISTRY,
   QUESTION_TYPE_LIST,
 } from "@razzia/web/features/questions"
+import FieldError from "@razzia/web/components/forms/FieldError"
 import CategoryField from "@razzia/web/features/quizz/components/QuestionEditor/QuestionEditorConfig/CategoryField"
 import ConfigField from "@razzia/web/features/quizz/components/QuestionEditor/QuestionEditorConfig/ConfigField"
-import { useQuizzEditor } from "@razzia/web/features/quizz/contexts/quizz-editor-context"
+import {
+  useQuizzEditor,
+  type QuizzFormValues,
+} from "@razzia/web/features/quizz/contexts/quizz-editor-context"
 import { LayoutList } from "lucide-react"
+import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
 const QuestionEditorConfig = () => {
@@ -25,6 +30,9 @@ const QuestionEditorConfig = () => {
     gameMode,
     updateQuestion,
   } = useQuizzEditor()
+  const {
+    formState: { errors },
+  } = useFormContext<QuizzFormValues>()
   const { t } = useTranslation()
   const questionType = currentQuestion.type
 
@@ -40,7 +48,13 @@ const QuestionEditorConfig = () => {
 
   const { ConfigComponent } = QUESTION_REGISTRY[questionType]
 
-  const typeOptions = QUESTION_TYPE_LIST.map((type) => ({
+  // A survey has no right answer, so it cannot hold a puzzle.
+  const typeOptions = QUESTION_TYPE_LIST.filter(
+    (type) =>
+      gameMode === QUIZZ_MODES.QUIZ ||
+      type === questionType ||
+      !QUESTION_REGISTRY[type].quizOnly,
+  ).map((type) => ({
     value: type,
     label: t(QUESTION_REGISTRY[type].labelKey),
   }))
@@ -64,6 +78,7 @@ const QuestionEditorConfig = () => {
             ))}
           </SelectContent>
         </Select>
+        <FieldError errors={[errors.questions?.[currentIndex]?.type]} pill />
       </ConfigField>
 
       {gameMode === QUIZZ_MODES.QUIZ && <CategoryField />}

@@ -6,6 +6,7 @@ import type {
 } from "@razzia/common/types/game"
 import * as estimation from "@razzia/web/features/questions/estimation"
 import * as multi from "@razzia/web/features/questions/multi"
+import * as puzzle from "@razzia/web/features/questions/puzzle"
 import * as single from "@razzia/web/features/questions/single"
 import type {
   AnswerComponentProps,
@@ -17,6 +18,7 @@ import type { ComponentType } from "react"
 
 interface QuestionRegistryEntry {
   labelKey: string
+  quizOnly?: boolean
   defaultOptions?: QuestionOptions
   scoringModes?: ScoringMode[]
   initialValues: (_question: Question) => Partial<Question>
@@ -32,6 +34,7 @@ export const QUESTION_REGISTRY: Record<QuestionType, QuestionRegistryEntry> = {
   single,
   multi,
   estimation,
+  puzzle,
 }
 
 export const QUESTION_TYPE_LIST = Object.keys(

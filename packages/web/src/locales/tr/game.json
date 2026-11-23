@@ -64,5 +64,10 @@
   },
   "showQrCode": "QR kodunu göster",
   "streak": "Doğru cevap serisi",
-  "pinDigit": "PIN'in {{position}}. rakamı"
+  "pinDigit": "PIN'in {{position}}. rakamı",
+  "puzzle": {
+    "hint": "Drag the pieces into the right order",
+    "correct": "Right order",
+    "incorrect": "Wrong order"
+  }
 }

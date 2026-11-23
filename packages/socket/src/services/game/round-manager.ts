@@ -4,6 +4,7 @@ import {
   MAX_POINTS,
   MEDIA_TYPES,
   NO_TIME_LIMIT,
+  QUESTION_TYPES,
   QUIZZ_MODES,
 } from "@razzia/common/constants"
 import { isEstimationOptions } from "@razzia/common/questions/options"
@@ -28,10 +29,15 @@ import { CooldownTimer } from "@razzia/socket/services/game/cooldown-timer"
 import { PlayerManager } from "@razzia/socket/services/game/player-manager"
 import {
   countAnswers,
+  countPuzzleResults,
   scoreQuestion,
   type ScoredPlayer,
 } from "@razzia/socket/services/scoring/round"
-import { orderToPoint, timeToPoint } from "@razzia/socket/utils/game"
+import {
+  createPuzzleOrder,
+  orderToPoint,
+  timeToPoint,
+} from "@razzia/socket/utils/game"
 import sleep, { SECOND_MS } from "@razzia/socket/utils/sleep"
 import { nanoid } from "nanoid"
 
@@ -76,6 +82,8 @@ export class RoundManager {
   private playersAnswers: Answer[] = []
   private startTime = 0
   private acceptingAnswers = false
+  // Puzzle only: `shown[i]` is the piece `answers[puzzleOrder[i]]`.
+  private puzzleOrder: number[] | null = null
   private leaderboard: Player[] = []
   private tempOldLeaderboard: Player[] | null = null
   private questionsHistory: QuestionResult[] = []
@@ -134,6 +142,19 @@ export class RoundManager {
 
   private isSurvey(): boolean {
     return this.opts.quizz.gameMode === QUIZZ_MODES.SURVEY
+  }
+
+  private isPuzzle(): boolean {
+    return this.question.type === QUESTION_TYPES.PUZZLE
+  }
+
+  // A puzzle keeps its answers in the right order, so the order the clients
+  // get is shuffled here: shuffling it client side would leak the solution.
+  private shownAnswers(): string[] {
+    const { answers } = this.question
+    const order = this.puzzleOrder
+
+    return order ? order.map((index) => answers[index]) : answers
   }
 
   // ── Auto advance ─────────────────────────────────────────────────────────
@@ -313,11 +334,14 @@ export class RoundManager {
     }
 
     this.startTime = Date.now()
+    this.puzzleOrder = this.isPuzzle()
+      ? createPuzzleOrder(this.question.answers.length)
+      : null
     this.acceptingAnswers = true
 
     this.opts.broadcast(STATUS.SELECT_ANSWER, {
       question: this.question.question,
-      answers: this.question.answers,
+      answers: this.shownAnswers(),
       media: this.question.media,
       time: this.question.time,
       totalPlayer: this.opts.players.count(),
@@ -362,7 +386,9 @@ export class RoundManager {
 
   private showResults(): void {
     const currentPlayers = this.opts.players.getAll()
-    const answerCounts = countAnswers(this.playersAnswers)
+    const answerCounts = this.isPuzzle()
+      ? countPuzzleResults(this.playersAnswers, this.question.answers.length)
+      : countAnswers(this.playersAnswers)
 
     if (this.isSurvey()) {
       this.opts.send(this.opts.getManagerId(), STATUS.SHOW_RESPONSES, {
@@ -498,8 +524,30 @@ export class RoundManager {
 
   // ── Player actions ───────────────────────────────────────────────────────
 
+  // A puzzle answer lists the shown positions from first to last. It is kept
+  // as original answer indexes, so scoring and history never see the shuffle.
+  private normalizePuzzleAnswer(positions: number[]): number[] | null {
+    const order = this.puzzleOrder
+    const total = this.question.answers.length
+
+    if (!order || positions.length !== total) {
+      return null
+    }
+
+    const isPermutation =
+      new Set(positions).size === total &&
+      positions.every((position) => Number.isInteger(position)) &&
+      positions.every((position) => position >= 0 && position < total)
+
+    return isPermutation ? positions.map((position) => order[position]) : null
+  }
+
   private normalizeAnswer(answerIds: number[]): number[] | null {
     const { options } = this.question
+
+    if (this.isPuzzle()) {
+      return this.normalizePuzzleAnswer(answerIds)
+    }
 
     if (!isEstimationOptions(options)) {
       return answerIds

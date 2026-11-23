@@ -1,4 +1,4 @@
-import { QUIZZ_MODES } from "@razzia/common/constants"
+import { QUESTION_TYPES, QUIZZ_MODES } from "@razzia/common/constants"
 import { isEstimationOptions } from "@razzia/common/questions/options"
 import type { PlayerAnswerRecord } from "@razzia/common/types/game"
 import {
@@ -25,6 +25,7 @@ const ResultModalTableRow = ({ playerAnswer }: RowProps) => {
 
   const isCorrect = correct ?? isAnswerCorrect(questionResult, answerIds)
   const isEstimation = isEstimationOptions(questionResult.options)
+  const isPuzzle = questionResult.type === QUESTION_TYPES.PUZZLE
 
   return (
     <tr>
@@ -37,7 +38,7 @@ const ResultModalTableRow = ({ playerAnswer }: RowProps) => {
         )}
         {hasAnswer && !isEstimation && (
           <div className="flex flex-wrap gap-1">
-            {answerIds.map((id) => (
+            {answerIds.map((id, position) => (
               <span
                 key={id}
                 className={clsx(
@@ -45,7 +46,9 @@ const ResultModalTableRow = ({ playerAnswer }: RowProps) => {
                   ANSWERS_COLORS[id % 4],
                 )}
               >
-                <span className="font-bold">{ANSWERS_LABELS[id % 4]}</span>
+                <span className="font-bold">
+                  {isPuzzle ? position + 1 : ANSWERS_LABELS[id % 4]}
+                </span>
                 <span className="max-w-30 truncate">
                   {questionResult.answers[id]}
                 </span>

@@ -3,6 +3,7 @@ import type { ScoringMode } from "@razzia/common/types/game"
 import { QUESTION_SCORING } from "@razzia/socket/services/scoring"
 import {
   createEstimationQuestion,
+  createPuzzleQuestion,
   createQuestion,
 } from "@razzia/socket/test/fixtures"
 import { describe, expect, it } from "vitest"
@@ -63,5 +64,26 @@ describe("estimation scoring", () => {
 
   it("scores nothing without an answer", () => {
     expect(score(question, [])).toBe(0)
+  })
+})
+
+describe("puzzle scoring", () => {
+  const score = QUESTION_SCORING[QUESTION_TYPES.PUZZLE]
+  const question = createPuzzleQuestion()
+
+  it("scores only the exact order", () => {
+    expect(score(question, [0, 1, 2, 3])).toBe(1)
+  })
+
+  it.each([
+    [[1, 0, 2, 3]],
+    [[3, 2, 1, 0]],
+    [[0, 1, 3, 2]],
+    [[0, 1, 2]],
+    [[0, 1, 2, 3, 4]],
+    [[0, 0, 2, 3]],
+    [[]],
+  ])("gives nothing for %j", (answerIds) => {
+    expect(score(question, answerIds)).toBe(0)
   })
 })

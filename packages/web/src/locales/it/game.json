@@ -65,5 +65,10 @@
   },
   "showQrCode": "Mostra codice QR",
   "streak": "Serie di risposte",
-  "pinDigit": "Cifra {{position}} del PIN"
+  "pinDigit": "Cifra {{position}} del PIN",
+  "puzzle": {
+    "hint": "Drag the pieces into the right order",
+    "correct": "Right order",
+    "incorrect": "Wrong order"
+  }
 }

@@ -66,13 +66,19 @@
     "notePlaceholder": "Aggiungi una spiegazione mostrata quando viene rivelata la risposta",
     "estimation": {
       "correctAnswer": "Risposta corretta"
+    },
+    "puzzle": {
+      "hint": "Add at least 3 answers in the right order. They are shuffled automatically during the game.",
+      "moveUp": "Move answer {{position}} up",
+      "moveDown": "Move answer {{position}} down"
     }
   },
   "questionHasErrors": "Questa domanda contiene errori",
   "questionType": {
     "single": "Scelta singola",
     "multi": "Scelta multipla",
-    "estimation": "Stima"
+    "estimation": "Stima",
+    "puzzle": "Puzzle"
   },
   "quizzSaved": "Quiz salvato con successo",
   "quizzUpdated": "Quiz aggiornato con successo",

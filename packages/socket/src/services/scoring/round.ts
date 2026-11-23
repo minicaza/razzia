@@ -1,3 +1,7 @@
+import {
+  isCorrectPuzzleOrder,
+  PUZZLE_RESPONSE,
+} from "@razzia/common/questions/puzzle"
 import type { Answer, Player, Question } from "@razzia/common/types/game"
 import { QUESTION_SCORING } from "@razzia/socket/services/scoring"
 
@@ -14,6 +18,20 @@ export const countAnswers = (answers: Answer[]): Record<number, number> => {
 
     return acc
   }, {})
+}
+
+export const countPuzzleResults = (
+  answers: Answer[],
+  total: number,
+): Record<number, number> => {
+  const correct = answers.filter((answer) =>
+    isCorrectPuzzleOrder(answer.answerIds, total),
+  ).length
+
+  return {
+    [PUZZLE_RESPONSE.CORRECT]: correct,
+    [PUZZLE_RESPONSE.INCORRECT]: answers.length - correct,
+  }
 }
 
 export const scoreQuestion = (

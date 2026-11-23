@@ -138,6 +138,7 @@ emit player:selectedAnswer { gameId, data: { answerKeys: number[] } }
 
 - `answerKeys` are 0-based indices into the `answers` array received in `SELECT_ANSWER`. For a `"single"` question, send a one-element array, e.g. `[1]` for the second button. For `"multi"`, send every button pressed, e.g. `[0, 2]`.
 - For an `"estimation"` question, send the value itself as a one-element array, e.g. `[27]`. It is clamped to `options.min` / `options.max`.
+- For a `"puzzle"` question, the `answers` you received are already shuffled. Send every position, from the piece you want on top to the piece you want at the bottom, e.g. `[2, 0, 1]` to put the third shown piece first. It must list each position exactly once, otherwise it is ignored and you can answer again. The server never sends the right order to players.
 - Points are time-weighted (faster correct answers score higher), computed server-side from `time` and when you answer relative to the start of the answer window. Estimation questions are the exception: they are scored on how close the value is to the expected one, regardless of speed.
 - After submitting, expect `data: { text: "game:waitingForAnswers" }` on the `WAIT` status, then, once the question closes (time runs out or every player has answered), `SHOW_RESULT` in quiz mode or another `WAIT` in survey mode.
 

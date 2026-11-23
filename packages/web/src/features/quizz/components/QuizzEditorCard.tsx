@@ -82,6 +82,12 @@ const QuizzEditorCard = ({
             <div className="bg-correct absolute top-1/2 left-1/2 size-1.5 -translate-1/2 rounded-full" />
           </div>
         </div>
+      ) : question.type === QUESTION_TYPES.PUZZLE ? (
+        <div className="flex flex-col gap-0.5">
+          {question.answers.map((_, i) => (
+            <div key={i} className="border-accent h-2 rounded-sm border" />
+          ))}
+        </div>
       ) : (
         <div className="grid grid-cols-2 gap-1">
           {question.answers.map((_, i) => (

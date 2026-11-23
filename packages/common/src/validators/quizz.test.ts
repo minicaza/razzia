@@ -39,6 +39,15 @@ const estimationQuestion = (overrides: Partial<Question> = {}): Question => ({
   ...overrides,
 })
 
+const puzzleQuestion = (overrides: Partial<Question> = {}): Question => ({
+  type: QUESTION_TYPES.PUZZLE,
+  question: "Order them",
+  answers: ["First", "Second", "Third"],
+  cooldown: 5,
+  time: 15,
+  ...overrides,
+})
+
 const quizz = (
   questions: Question[],
   gameMode: Quizz["gameMode"] = QUIZZ_MODES.QUIZ,
@@ -132,6 +141,42 @@ describe("quizzValidator", () => {
     expect(issues(quizz([estimationQuestion({ solutions: [101] })]))).toContain(
       "errors:quizz.estimationSolutionOutOfRange",
     )
+  })
+
+  it("accepts a puzzle without solutions, as its answers are the solution", () => {
+    expect(issues(quizz([puzzleQuestion()]))).toEqual([])
+    expect(
+      issues(
+        quizz([puzzleQuestion({ answers: ["A", "B", "C", "D"] })]),
+      ),
+    ).toEqual([])
+  })
+
+  it("limits a puzzle to 3-4 answers", () => {
+    expect(
+      issues(quizz([puzzleQuestion({ answers: ["A", "B"] })])),
+    ).toContain("errors:quizz.puzzleTooFewAnswers")
+    expect(
+      issues(quizz([puzzleQuestion({ answers: ["A", "B", "C", "D", "E"] })])),
+    ).toContain("errors:quizz.tooManyAnswers")
+  })
+
+  it("rejects an empty puzzle piece", () => {
+    expect(
+      issues(quizz([puzzleQuestion({ answers: ["A", "", "C"] })])),
+    ).toContain("errors:quizz.answerEmpty")
+  })
+
+  it("rejects a puzzle in a survey, which has no right order", () => {
+    expect(issues(quizz([puzzleQuestion()], QUIZZ_MODES.SURVEY))).toContain(
+      "errors:quizz.puzzleNotInSurvey",
+    )
+  })
+
+  it("still requires solutions on the other questions of a quizz with a puzzle", () => {
+    expect(
+      issues(quizz([puzzleQuestion(), choiceQuestion({ solutions: [] })])),
+    ).toContain("errors:quizz.noSolution")
   })
 })
 

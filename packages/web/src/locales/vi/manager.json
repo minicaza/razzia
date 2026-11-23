@@ -42,6 +42,10 @@
       "withinMargin": "{{value}} ± {{margin}}",
       "outsideMargin": "Ngoài biên độ",
       "average": "Câu trả lời trung bình: {{value}}"
+    },
+    "puzzle": {
+      "correct": "Right order",
+      "incorrect": "Wrong order"
     }
   },
   "tabs": {

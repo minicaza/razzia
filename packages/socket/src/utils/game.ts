@@ -1,4 +1,5 @@
 import { MAX_POINTS } from "@razzia/common/constants"
+import { isCorrectPuzzleOrder } from "@razzia/common/questions/puzzle"
 import type { Question } from "@razzia/common/types/game"
 import type { Socket } from "@razzia/common/types/game/socket"
 import Game from "@razzia/socket/services/game"
@@ -66,6 +67,23 @@ export const createInviteCode = (length = 6) => {
   }
 
   return result
+}
+
+/**
+ * Shuffles the positions of a puzzle's pieces. The result is never the right
+ * order, otherwise a puzzle could be solved without touching a piece.
+ */
+export const createPuzzleOrder = (total: number): number[] => {
+  const order = Array.from({ length: total }, (_, index) => index)
+    .map((value) => ({ value, key: Math.random() }))
+    .sort((a, b) => a.key - b.key)
+    .map(({ value }) => value)
+
+  if (total > 1 && isCorrectPuzzleOrder(order, total)) {
+    return [...order.slice(1), order[0]]
+  }
+
+  return order
 }
 
 export const orderToPoint = (

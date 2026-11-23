@@ -4,3 +4,21 @@
 .secrets
 release.json
 /coverage
+.atenea/.global-tools-migrated
+.mcp.json
+# Atenea skills management
+.atenea/plugins.json
+.claude/skills/fwk-*
+.claude/skills/atenea-*
+.claude/skills/commons-*
+.claude/skills/presentation-*
+.claude/skills/data-*
+.claude/skills/unit-*
+.claude/skills/conexion.json-*
+.claude/skills/stdweb-*
+.claude/skills/common-*
+.claude/skills/architecture-*
+# fwk-setup: ficheros generados localmente
+/setup-environment.log
+/.claude/skills/conexion.json
+.claude/skills/mia-*

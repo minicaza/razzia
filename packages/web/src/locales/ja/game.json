@@ -64,5 +64,10 @@
   },
   "showQrCode": "QRコードを表示",
   "streak": "連続正解",
-  "pinDigit": "PIN の {{position}} 桁目"
+  "pinDigit": "PIN の {{position}} 桁目",
+  "puzzle": {
+    "hint": "Drag the pieces into the right order",
+    "correct": "Right order",
+    "incorrect": "Wrong order"
+  }
 }

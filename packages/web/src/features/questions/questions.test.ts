@@ -46,6 +46,19 @@ describe("isAnswerCorrect", () => {
     expect(isAnswerCorrect(question({ solutions: undefined }), [0])).toBe(false)
   })
 
+  it("accepts a puzzle only in the exact order", () => {
+    const puzzle = question({
+      type: QUESTION_TYPES.PUZZLE,
+      answers: ["A", "B", "C"],
+      solutions: undefined,
+    })
+
+    expect(isAnswerCorrect(puzzle, [0, 1, 2])).toBe(true)
+    expect(isAnswerCorrect(puzzle, [0, 2, 1])).toBe(false)
+    expect(isAnswerCorrect(puzzle, [0])).toBe(false)
+    expect(isAnswerCorrect(puzzle, null)).toBe(false)
+  })
+
   it("accepts estimations within the margin", () => {
     const estimation = question({
       type: QUESTION_TYPES.ESTIMATION,

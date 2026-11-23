@@ -34,6 +34,16 @@ export const createEstimationQuestion = (
     ...overrides,
   })
 
+export const createPuzzleQuestion = (
+  overrides: Partial<Question> = {},
+): Question =>
+  createQuestion({
+    type: QUESTION_TYPES.PUZZLE,
+    answers: ["First", "Second", "Third", "Fourth"],
+    solutions: undefined,
+    ...overrides,
+  })
+
 export const createQuizz = (
   questions: Question[],
   gameMode: Quizz["gameMode"] = QUIZZ_MODES.QUIZ,

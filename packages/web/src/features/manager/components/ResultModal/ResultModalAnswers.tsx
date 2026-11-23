@@ -117,9 +117,30 @@ const ResultModalAnswers = () => {
     ]
   }
 
+  const puzzleRows = (): AnswerRow[] => [
+    {
+      label: t("manager:result.puzzle.correct"),
+      count: correctCount,
+      isCorrect: true,
+      color: "bg-correct",
+      answerLabel: "✓",
+    },
+    {
+      label: t("manager:result.puzzle.incorrect"),
+      count: answeredCount - correctCount,
+      isCorrect: false,
+      color: "bg-red-500",
+      answerLabel: "✗",
+    },
+  ]
+
   const answerRows: AnswerRow[] = (() => {
     if (questionResult.type === QUESTION_TYPES.ESTIMATION) {
       return estimationRows()
+    }
+
+    if (questionResult.type === QUESTION_TYPES.PUZZLE) {
+      return puzzleRows()
     }
 
     return questionResult.answers.map((label, ai) => ({

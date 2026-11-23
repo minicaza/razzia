@@ -42,6 +42,10 @@
       "withinMargin": "{{value}} ± {{margin}}",
       "outsideMargin": "Hors de la marge",
       "average": "Réponse moyenne : {{value}}"
+    },
+    "puzzle": {
+      "correct": "Right order",
+      "incorrect": "Wrong order"
     }
   },
   "tabs": {

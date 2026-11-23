@@ -66,13 +66,19 @@
     "notePlaceholder": "Añade una explicación que se muestra al revelar la respuesta",
     "estimation": {
       "correctAnswer": "Respuesta correcta"
+    },
+    "puzzle": {
+      "hint": "Añade al menos 3 respuestas en el orden correcto. Se ordenarán automáticamente al azar durante el juego.",
+      "moveUp": "Subir la respuesta {{position}}",
+      "moveDown": "Bajar la respuesta {{position}}"
     }
   },
   "questionHasErrors": "Esta pregunta contiene errores",
   "questionType": {
     "single": "Opción única",
     "multi": "Opción múltiple",
-    "estimation": "Estimación"
+    "estimation": "Estimación",
+    "puzzle": "Puzzle"
   },
   "quizzSaved": "Cuestionario guardado con éxito",
   "quizzUpdated": "Cuestionario actualizado con éxito",

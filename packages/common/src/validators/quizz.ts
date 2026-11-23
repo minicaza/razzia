@@ -68,12 +68,26 @@ export const quizzValidator = z
     questions: z.array(questionValidator).min(1, "errors:quizz.noQuestions"),
   })
   .superRefine((quizz, ctx) => {
-    if (quizz.gameMode !== QUIZZ_MODES.QUIZ) {
-      return
-    }
+    const isQuiz = quizz.gameMode === QUIZZ_MODES.QUIZ
 
     quizz.questions.forEach((question, index) => {
-      if (question.solutions && question.solutions.length > 0) {
+      const isPuzzle = question.type === QUESTION_TYPES.PUZZLE
+
+      if (isPuzzle && !isQuiz) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["questions", index, "type"],
+          message: "errors:quizz.puzzleNotInSurvey",
+        })
+      }
+
+      // A puzzle has no solutions: its answers are already in the right order.
+      const needsSolution = isQuiz && !isPuzzle
+
+      if (
+        !needsSolution ||
+        (question.solutions && question.solutions.length > 0)
+      ) {
         return
       }
 

@@ -1,12 +1,43 @@
 import { createQuestion } from "@razzia/socket/test/fixtures"
 import { normalizeFilename } from "@razzia/socket/utils/file"
-import { orderToPoint, timeToPoint } from "@razzia/socket/utils/game"
+import {
+  createPuzzleOrder,
+  orderToPoint,
+  timeToPoint,
+} from "@razzia/socket/utils/game"
 import { createNickname } from "@razzia/socket/utils/nickname"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 afterEach(() => {
   vi.useRealTimers()
   vi.restoreAllMocks()
+})
+
+describe("createPuzzleOrder", () => {
+  it.each([2, 3, 4])("shuffles %d pieces without losing any", (total) => {
+    const order = createPuzzleOrder(total)
+
+    expect([...order].sort((a, b) => a - b)).toEqual(
+      Array.from({ length: total }, (_, index) => index),
+    )
+  })
+
+  it("never hands out the solved order", () => {
+    // A shuffle that keeps the order would otherwise be returned as is
+    vi.spyOn(Math, "random").mockReturnValue(0.5)
+
+    for (let run = 0; run < 50; run += 1) {
+      expect(createPuzzleOrder(4)).not.toEqual([0, 1, 2, 3])
+    }
+  })
+
+  it("actually varies the order", () => {
+    const seen = new Set(
+      Array.from({ length: 60 }, () => createPuzzleOrder(4).join(",")),
+    )
+
+    expect(seen.size).toBeGreaterThan(5)
+  })
 })
 
 describe("orderToPoint", () => {

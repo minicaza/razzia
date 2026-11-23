@@ -58,7 +58,9 @@
     "estimationSolutionOutOfRange": "Đáp án đúng phải nằm giữa giá trị tối thiểu và tối đa",
     "estimationStepInvalid": "Bước nhảy phải lớn hơn 0",
     "estimationMarginNegative": "Biên độ không được âm",
-    "estimationInvalidOptions": "Cài đặt ước lượng bị thiếu hoặc không hợp lệ"
+    "estimationInvalidOptions": "Cài đặt ước lượng bị thiếu hoặc không hợp lệ",
+    "puzzleTooFewAnswers": "A puzzle must have at least 3 answers",
+    "puzzleNotInSurvey": "A puzzle needs a right order, so it cannot be used in a survey"
   },
   "result": {
     "notFound": "Không tìm thấy kết quả"

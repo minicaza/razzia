@@ -1,8 +1,13 @@
 import {
   countAnswers,
+  countPuzzleResults,
   scoreQuestion,
 } from "@razzia/socket/services/scoring/round"
-import { createPlayer, createQuestion } from "@razzia/socket/test/fixtures"
+import {
+  createPlayer,
+  createPuzzleQuestion,
+  createQuestion,
+} from "@razzia/socket/test/fixtures"
 import { describe, expect, it } from "vitest"
 
 const alice = () => createPlayer({ id: "alice", username: "Alice" })
@@ -19,7 +24,39 @@ describe("countAnswers", () => {
   })
 })
 
+describe("countPuzzleResults", () => {
+  it("counts the right and the wrong orders instead of each answer", () => {
+    const counts = countPuzzleResults(
+      [
+        { playerId: "alice", answerIds: [0, 1, 2], points: 0 },
+        { playerId: "bob", answerIds: [2, 1, 0], points: 0 },
+        { playerId: "carol", answerIds: [0, 1, 2], points: 0 },
+      ],
+      3,
+    )
+
+    expect(counts).toEqual({ 0: 2, 1: 1 })
+  })
+
+  it("reports zero of each without answers", () => {
+    expect(countPuzzleResults([], 3)).toEqual({ 0: 0, 1: 0 })
+  })
+})
+
 describe("scoreQuestion", () => {
+  it("gives a puzzle its points only for the exact order", () => {
+    const players = [alice(), bob()]
+    const scored = scoreQuestion(createPuzzleQuestion(), players, [
+      { playerId: "alice", answerIds: [0, 1, 2, 3], points: 800 },
+      { playerId: "bob", answerIds: [1, 0, 2, 3], points: 900 },
+    ])
+
+    expect(scored.map((p) => [p.username, p.points, p.lastCorrect])).toEqual([
+      ["Alice", 800, true],
+      ["Bob", 0, false],
+    ])
+  })
+
   it("adds the answer points to correct players and sorts by score", () => {
     const players = [alice(), bob()]
     const scored = scoreQuestion(createQuestion({ solutions: [0] }), players, [

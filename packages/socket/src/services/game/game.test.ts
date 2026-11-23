@@ -16,6 +16,7 @@ import Game from "@razzia/socket/services/game"
 import { createFakeIo } from "@razzia/socket/test/fake-io"
 import {
   createEstimationQuestion,
+  createPuzzleQuestion,
   createQuestion,
   createQuizz,
 } from "@razzia/socket/test/fixtures"
@@ -69,6 +70,152 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.useRealTimers()
+})
+
+describe("puzzle questions", () => {
+  const PIECES = ["First", "Second", "Third", "Fourth"]
+
+  const shownPieces = (game: Game, status: (room: string) => unknown) =>
+    (status(game.gameId) as { data: { answers: string[] } }).data.answers
+
+  // The positions a player sends to put the shown pieces in the right order
+  const solve = (shown: string[]) => PIECES.map((piece) => shown.indexOf(piece))
+
+  it("shuffles the pieces on the server, never in the solved order", async () => {
+    const { game, status, start } = setup(
+      createQuizz([createPuzzleQuestion({ answers: PIECES })]),
+    )
+
+    await start()
+
+    const shown = shownPieces(game, status)
+
+    expect([...shown].sort()).toEqual([...PIECES].sort())
+    expect(shown).not.toEqual(PIECES)
+  })
+
+  it("keeps the same shuffle for a player who reconnects", async () => {
+    const { game, sockets, lastEvent, status, start } = setup(
+      createQuizz([createPuzzleQuestion({ answers: PIECES })]),
+    )
+    const [alice] = sockets
+
+    await start()
+
+    const shown = shownPieces(game, status)
+
+    game.reconnect(alice)
+
+    const reconnect = lastEvent("alice", EVENTS.PLAYER.SUCCESS_RECONNECT)
+      ?.data as { status: { data: { answers: string[] } } }
+
+    expect(reconnect.status.data.answers).toEqual(shown)
+  })
+
+  it("scores the right order only and tells the manager how many got it", async () => {
+    const { game, sockets, status, start } = setup(
+      createQuizz([createPuzzleQuestion({ answers: PIECES })]),
+    )
+    const [alice, bob] = sockets
+
+    await start()
+
+    const shown = shownPieces(game, status)
+
+    game.selectAnswer(alice, solve(shown))
+    game.selectAnswer(bob, [0, 1, 2, 3])
+    await vi.advanceTimersByTimeAsync(TICK_MS)
+
+    expect(status("alice")).toMatchObject({
+      name: STATUS.SHOW_RESULT,
+      data: { correct: true, rank: 1 },
+    })
+    expect(status("bob")).toMatchObject({
+      name: STATUS.SHOW_RESULT,
+      data: { correct: false, points: 0 },
+    })
+    expect(status(MANAGER)).toMatchObject({
+      name: STATUS.SHOW_RESPONSES,
+      data: { responses: { 0: 1, 1: 1 }, answers: PIECES },
+    })
+    expect(status(MANAGER)?.data.solutions).toBeUndefined()
+  })
+
+  it.each([
+    ["a repeated position", [0, 0, 1, 2]],
+    ["a missing piece", [0, 1, 2]],
+    ["an extra piece", [0, 1, 2, 3, 4]],
+    ["an out of range position", [0, 1, 2, 7]],
+    ["a negative position", [0, 1, 2, -1]],
+    ["a fractional position", [0, 1, 2, 0.5]],
+    ["no answer", []],
+  ])("ignores %s and lets the player answer again", async (_name, positions) => {
+    const { game, sockets, status, start } = setup(
+      createQuizz([createPuzzleQuestion({ answers: PIECES })]),
+    )
+    const [alice] = sockets
+
+    await start()
+
+    const shown = shownPieces(game, status)
+
+    game.selectAnswer(alice, positions)
+    game.selectAnswer(alice, solve(shown))
+    game.advance()
+    await vi.advanceTimersByTimeAsync(TICK_MS)
+
+    expect(status("alice")?.data).toMatchObject({ correct: true })
+  })
+
+  it("saves the answers in the original order, not the shuffled one", async () => {
+    const { game, sockets, status, start } = setup(
+      createQuizz([createPuzzleQuestion({ answers: PIECES })]),
+    )
+    const [alice, bob] = sockets
+
+    await start()
+
+    const shown = shownPieces(game, status)
+
+    // Reversing the solution can never give the solution back
+    game.selectAnswer(alice, solve(shown))
+    game.selectAnswer(bob, [...solve(shown)].reverse())
+    await vi.advanceTimersByTimeAsync(TICK_MS)
+    game.advance()
+
+    const [meta] = getResultsMeta()
+    const [question] = getResultById(meta.id).questions
+
+    expect(question.type).toBe(QUESTION_TYPES.PUZZLE)
+    expect(question.playerAnswers).toMatchObject([
+      { playerName: "Alice", answerIds: [0, 1, 2, 3], correct: true },
+      { playerName: "Bob", answerIds: [3, 2, 1, 0], correct: false },
+    ])
+  })
+
+  it("shuffles again for the next puzzle", async () => {
+    const questions = [
+      createPuzzleQuestion({ answers: PIECES }),
+      createPuzzleQuestion({ answers: ["One", "Two", "Three"] }),
+    ]
+    const { game, sockets, status, start, reachAnswers } = setup(
+      createQuizz(questions),
+    )
+    const [alice] = sockets
+
+    await start()
+    game.selectAnswer(alice, solve(shownPieces(game, status)))
+    game.advance()
+    await vi.advanceTimersByTimeAsync(TICK_MS)
+    game.advance()
+    await reachAnswers(questions[1], false)
+
+    expect([...shownPieces(game, status)].sort()).toEqual([
+      "One",
+      "Three",
+      "Two",
+    ])
+  })
 })
 
 describe("joining a game", () => {

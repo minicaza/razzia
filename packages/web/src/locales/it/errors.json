@@ -58,7 +58,9 @@
     "estimationSolutionOutOfRange": "La risposta corretta deve essere compresa tra il minimo e il massimo",
     "estimationStepInvalid": "Il passo deve essere maggiore di 0",
     "estimationMarginNegative": "Il margine non può essere negativo",
-    "estimationInvalidOptions": "Le impostazioni della stima mancano o non sono valide"
+    "estimationInvalidOptions": "Le impostazioni della stima mancano o non sono valide",
+    "puzzleTooFewAnswers": "A puzzle must have at least 3 answers",
+    "puzzleNotInSurvey": "A puzzle needs a right order, so it cannot be used in a survey"
   },
   "result": {
     "notFound": "Risultato non trovato"
