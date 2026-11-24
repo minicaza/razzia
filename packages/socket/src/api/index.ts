@@ -1,6 +1,7 @@
 import { auth } from "@razzia/socket/api/routes/auth"
 import { games } from "@razzia/socket/api/routes/games"
 import { media } from "@razzia/socket/api/routes/media"
+import { network } from "@razzia/socket/api/routes/network"
 import { quizz } from "@razzia/socket/api/routes/quizz"
 import { results } from "@razzia/socket/api/routes/results"
 import { Hono } from "hono"
@@ -12,6 +13,7 @@ const routes = new Hono()
   .route("/results", results)
   .route("/games", games)
   .route("/media", media)
+  .route("/network", network)
 
 export const api = routes
 

@@ -188,7 +188,7 @@ describe("auth", () => {
 })
 
 describe("manager routes", () => {
-  it.each(["/quizz", "/results", "/media"])(
+  it.each(["/quizz", "/results", "/media", "/network"])(
     "%s rejects players and anonymous users",
     async (path) => {
       expect((await request(path)).status).toBe(StatusCodes.UNAUTHORIZED)
@@ -223,6 +223,15 @@ describe("manager routes", () => {
 
     expect(missing.status).toBe(StatusCodes.NOT_FOUND)
     expect(await json(missing)).toEqual({ error: "errors:quizz.notFound" })
+  })
+
+  it("lists the LAN addresses of the server", async () => {
+    const response = await request("/network", { token: managerToken })
+
+    expect(response.status).toBe(StatusCodes.OK)
+    const { addresses } = await json<{ addresses: string[] }>(response)
+
+    expect(Array.isArray(addresses)).toBe(true)
   })
 
   it("returns the translated validation error", async () => {

@@ -6,6 +6,7 @@ import {
   useEvent,
   useSocket,
 } from "@razzia/web/features/game/contexts/socket-context"
+import { useJoinUrl } from "@razzia/web/features/game/hooks/useJoinUrl"
 import { useManagerStore } from "@razzia/web/features/game/stores/manager"
 import { useOnClickOutside } from "@razzia/web/hooks/useOnClickOutside"
 import { Lock, Maximize2, X } from "lucide-react"
@@ -21,7 +22,7 @@ interface Props {
 const Room = ({ data: { text, inviteCode } }: Props) => {
   const { gameId, players, locked } = useManagerStore()
   const { socket } = useSocket()
-  const webUrl = window.location.origin
+  const webUrl = useJoinUrl()
   const [playerList, setPlayerList] =
     useState<Array<Player & { timedOut?: boolean }>>(players)
   const [qrOpen, setQrOpen] = useState(false)

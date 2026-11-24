@@ -83,11 +83,16 @@ All of these require a bearer whose role is `manager`, and answer `401 errors:au
 | `GET /api/results/:id`    | `200` the full result              | `404 errors:result.notFound` |
 | `DELETE /api/results/:id` | `204`                              | `404 errors:result.notFound` |
 | `POST /api/games`         | `201 { gameId, inviteCode }`       | `404 errors:quizz.notFound`  |
+| `GET /api/network`        | `200 { addresses: string[] }`      | —                            |
 | `GET /api/media`          | `200 { media: [media] }`           | —                            |
 | `POST /api/media`         | `201` the stored media             | `400`, `413`, `415`          |
 | `DELETE /api/media/:name` | `204`                              | `400`, `404`                 |
 
 The quiz body is validated against the same schema as the files in `config/quizz` — see [Quiz](quiz.md).
+
+### Network
+
+`GET /api/network` lists the IPv4 addresses of the machine running the server on its local network (loopback, container, hypervisor and VPN interfaces are skipped). The waiting room uses the first one in the join QR code when the manager opens Razzia through `localhost`, so players on the same network can scan it. Inside Docker the server only sees the container's own address, so open the app through the host's LAN address instead.
 
 ### Media
 

@@ -11,5 +11,12 @@ export const inviteCodeQuery = (inviteCode: string) =>
     staleTime: 0,
   })
 
+export const networkQuery = () =>
+  queryOptions({
+    queryKey: ["network"] as const,
+    queryFn: () => unwrap(api.network.$get()),
+    staleTime: Infinity,
+  })
+
 export const joinGame = (json: { inviteCode: string; username?: string }) =>
   unwrap(api.games.join.$post({ json }))
